@@ -1,0 +1,100 @@
+---
+// Sala de trabajos: una sola pantalla con los informes en fila. Al bajar (o arrastrando)
+// las tarjetas pasan de lado y giran en 3D al acercarse al centro, sobre un suelo en perspectiva.
+import type { CollectionEntry } from 'astro:content';
+import { dos } from '../utils';
+import { TOTAL_PROYECTOS } from '../consts';
+interface Props { proyectos: CollectionEntry<'proyectos'>[] }
+const { proyectos } = Astro.props;
+// Huecos temporales hasta publicar los otros dos proyectos: solo se ven aquí y no enlazan a nada.
+const temporales = Array.from({ length: Math.max(0, TOTAL_PROYECTOS - proyectos.length) }, (_, i) => proyectos.length + i + 1);
+const total = proyectos.length + temporales.length;
+---
+<section class="sala" id="proyectos" data-sala data-tone="dark" data-cursor-text="Arrastra">
+  <div class="suelo" aria-hidden="true"><div class="suelo-in" data-suelo></div></div>
+
+  <div class="sala-top pad">
+    <p class="label">( {dos(total)} ) Trabajos seleccionados</p>
+  </div>
+
+  <div class="pista" data-pista>
+    {proyectos.map((p, i) => (
+      <a class="carta" href={`/proyectos/${p.id}/`} data-carta data-cursor-text="Ver caso">
+        <div class="carta-in" data-carta-in>
+          <div class="carta-img">
+            <img src={p.data.captura} alt={`Informe ${p.data.titulo}`} loading="lazy" decoding="async" draggable="false" />
+          </div>
+          <div class="carta-pie">
+            <span class="carta-n num tnum">{dos(i + 1)}</span>
+            <span class="carta-t serif">{p.data.titulo}</span>
+            <span class="carta-a">{p.data.area} · <span class="tnum">{p.data.anio}</span></span>
+            <span class="carta-go" aria-hidden="true">→</span>
+          </div>
+        </div>
+      </a>
+    ))}
+    {temporales.map((n) => (
+      <div class="carta carta-temp" data-carta data-cursor-text="Pronto">
+        <div class="carta-in" data-carta-in>
+          <div class="carta-img temp-img" aria-hidden="true"></div>
+          <div class="carta-pie">
+            <span class="carta-n num tnum">{dos(n)}</span>
+            <span class="carta-t serif">Próximamente</span>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <div class="sala-bot pad">
+    <p class="label">Desliza o arrastra <span aria-hidden="true">↔</span></p>
+    <p class="label tnum"><span data-sala-n>01</span> / {dos(total)}</p>
+  </div>
+
+  <div class="cursor" data-cursor aria-hidden="true"><span>Ver caso</span></div>
+</section>
+
+<style>
+  .sala { position: relative; background: var(--paper); overflow: hidden; padding-block: 6rem 4rem; }
+  .sala-top, .sala-bot { display: flex; justify-content: space-between; gap: 1rem; position: relative; z-index: 2; }
+  .sala-top .label, .sala-bot .label { margin: 0; }
+  .sala-bot { margin-top: 2rem; }
+
+  /* Suelo en perspectiva */
+  .suelo { position: absolute; left: 0; right: 0; bottom: 0; height: 52%; perspective: 520px; overflow: hidden; pointer-events: none;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 45%); mask-image: linear-gradient(180deg, transparent 0%, #000 45%); }
+  .suelo-in { position: absolute; left: -100%; width: 300%; bottom: 0; height: 320%; transform-origin: 50% 100%; transform: rotateX(74deg);
+    background-image: linear-gradient(rgba(242, 239, 233, 0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(242, 239, 233, 0.13) 1px, transparent 1px);
+    background-size: 90px 90px; }
+
+  /* Pista (versión base: fila con desplazamiento lateral nativo, útil en móvil) */
+  .pista { position: relative; z-index: 1; display: flex; gap: 1.2rem; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2.5rem var(--pad); scrollbar-width: none; }
+  .pista::-webkit-scrollbar { display: none; }
+  .carta { flex: 0 0 min(86vw, 40rem); scroll-snap-align: center; text-decoration: none; color: var(--ink); }
+  .carta-in { will-change: transform; }
+  .carta-img { aspect-ratio: 16 / 9; overflow: hidden; border-radius: 14px; background: #f4f5f7;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 50px 100px -30px rgba(0, 0, 0, 0.95), 0 0 120px -30px rgba(255, 255, 255, 0.14); }
+  .carta-img img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; }
+  .carta-pie { display: grid; grid-template-columns: auto 1fr auto; grid-template-rows: auto auto; column-gap: 1rem; align-items: baseline; padding: 1.2rem 0.2rem 0; }
+  .carta-n { grid-row: span 2; color: var(--muted); font-size: 1.1rem; }
+  .carta-t { font-size: clamp(1.5rem, 2.4vw, 2.3rem); line-height: 1; letter-spacing: -0.02em; }
+  .carta-a { grid-column: 2; color: var(--muted); font-size: 0.82rem; margin-top: 0.45rem; }
+  .carta-go { grid-row: 1 / span 2; grid-column: 3; align-self: center; width: 2.8rem; height: 2.8rem; border-radius: 50%; border: 1px solid var(--line-strong); display: grid; place-items: center; transition: background-color 0.4s, color 0.4s; }
+  .carta:hover .carta-go { background: var(--ink); color: var(--paper); }
+
+  /* Hueco temporal: imagen neutra, sin contenido */
+  .carta-temp { cursor: default; }
+  .carta-img.temp-img { background-color: #161616; background-image: linear-gradient(rgba(242, 239, 233, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(242, 239, 233, 0.05) 1px, transparent 1px); background-size: 48px 48px; }
+
+  /* Modo sala (escritorio con animación): pantalla fija y la pista se mueve con el scroll */
+  :global(.js-motion) .sala:global(.live) { height: 100svh; padding: 0; display: flex; flex-direction: column; justify-content: space-between; padding-block: 6rem 2rem; }
+  :global(.js-motion) .sala:global(.live) .pista { overflow: visible; scroll-snap-type: none; gap: 7vw; padding: 0 calc(50vw - min(29vw, 46svh * 16 / 9 / 2)); will-change: transform; }
+  :global(.js-motion) .sala:global(.live) .carta { flex-basis: min(58vw, 46svh * 16 / 9); }
+  :global(.js-motion) .sala:global(.live) { user-select: none; -webkit-user-select: none; }
+  :global(.cursor-on) .sala:global(.live) { cursor: none; }
+  :global(.cursor-on) .sala:global(.live) a { cursor: none; }
+
+  /* Cursor con texto */
+  .cursor { position: fixed; left: 0; top: 0; z-index: 70; width: 6rem; height: 6rem; margin: -3rem 0 0 -3rem; border-radius: 50%; background: var(--ink); color: var(--paper); display: grid; place-items: center; font-size: 0.78rem; pointer-events: none; opacity: 0; transform: scale(0.4); }
+
+</style>

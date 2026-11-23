@@ -1,0 +1,86 @@
+---
+import Base from '../../layouts/Base.astro';
+import PowerBI from '../../components/PowerBI.astro';
+import { proyectosOrdenados, dos } from '../../utils';
+import { TOTAL_PROYECTOS } from '../../consts';
+
+export async function getStaticPaths() {
+  const lista = await proyectosOrdenados();
+  return lista.map((p, i) => ({
+    params: { slug: p.id },
+    props: { p, i, total: lista.length, sig: lista[(i + 1) % lista.length], sigN: ((i + 1) % lista.length) + 1 },
+  }));
+}
+const { p, i, total, sig, sigN } = Astro.props;
+const d = p.data;
+// Si el siguiente proyecto aún no existe, el cierre lo anuncia sin enlazar
+const siguienteEsHueco = i + 1 >= total && i + 1 < TOTAL_PROYECTOS;
+---
+<Base titulo={d.titulo} descripcion={d.resumen}>
+  <article>
+    <header class="cab pad" data-hero>
+      <div class="columna">
+      <div class="cab-top">
+        <a class="label volver" href="/#proyectos">← Proyectos</a>
+      </div>
+      <div class="titulo-fila">
+        <h1 class="display" data-split>{d.titulo}</h1>
+        <p class="label" data-reveal="0">{d.area}</p>
+      </div>
+      <div class="informe-top" id="informe">
+        <PowerBI url={d.informe?.url} titulo={d.informe?.titulo ?? d.titulo} />
+      </div>
+      <div class="nota">
+        <p class="frase serif">{d.frase ?? d.resumen}</p>
+        {d.cadena.length > 0 && (
+          <p class="cadena">
+            {d.cadena.map((paso, k) => <>{k > 0 && <span class="flecha" aria-hidden="true">→</span>}<span>{paso}</span></>)}
+          </p>
+        )}
+        {d.credito && <p class="credito">{d.credito}</p>}
+      </div>
+      </div>
+    </header>
+
+    {siguienteEsHueco ? (
+      <div class="siguiente pad">
+        <div class="columna">
+          <span class="label">Siguiente proyecto · {dos(i + 2)}</span>
+          <span class="sig-t display">Próximamente</span>
+          <a class="link sig-volver" href="/#proyectos">← Ver los proyectos</a>
+        </div>
+      </div>
+    ) : total > 1 && (
+      <a class="siguiente pad" href={`/proyectos/${sig.id}/`}>
+        <span class="columna">
+          <span class="label">Siguiente proyecto · {dos(sigN)}</span>
+          <span class="sig-t display">{sig.data.titulo} <span class="arrow">→</span></span>
+        </span>
+      </a>
+    )}
+  </article>
+</Base>
+
+<style>
+  .cab { padding-top: clamp(5.2rem, 7vw, 6rem); padding-bottom: clamp(3.5rem, 7vw, 6rem); }
+  .cab-top { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+  .volver { text-decoration: none; color: var(--ink); }
+  .volver:hover { color: var(--gold); }
+  .titulo-fila { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0.3rem 2rem; }
+  .titulo-fila .label { margin: 0; }
+  h1 { font-size: clamp(2.3rem, 4.4vw, 4rem); margin: 0; }
+  /* El informe cabe entero en la primera pantalla; la nota va alineada con él */
+  .columna { display: block; width: min(100%, max(38rem, calc((100svh - 15.5rem - 70px) * 16 / 9))); margin-inline: auto; }
+  .informe-top { margin-top: 1.1rem; scroll-margin-top: 5rem; }
+  .nota { margin-top: clamp(2rem, 4vw, 3rem); }
+  .frase { margin: 0; max-width: 34ch; font-size: clamp(1.45rem, 2.4vw, 2.1rem); font-weight: 300; line-height: 1.25; color: var(--ink); }
+  .cadena { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem 0.8rem; margin: 1.6rem 0 0; padding-top: 1.1rem; border-top: 1px solid var(--line-strong); font-size: 0.95rem; color: var(--ink); }
+  .flecha { color: var(--accent); }
+  .credito { margin: 0.9rem 0 0; font-size: 0.85rem; line-height: 1.5; color: var(--muted); }
+
+  .siguiente { display: block; text-decoration: none; background: var(--paper-2); padding-block: clamp(5rem, 10vw, 9rem); border-top: 1px solid var(--line); }
+  .siguiente .label { display: block; margin-bottom: 1.5rem; }
+  .sig-t { font-size: clamp(2.6rem, 8vw, 7.5rem); display: block; max-width: 16ch; transition: color 0.5s var(--ease); }
+  .sig-volver { display: inline-block; margin-top: 1.6rem; font-size: 0.9rem; }
+  a.siguiente:hover .sig-t { color: var(--gold); }
+</style>

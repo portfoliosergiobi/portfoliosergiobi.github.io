@@ -1,0 +1,100 @@
+---
+import Base from '../layouts/Base.astro';
+import Sala from '../components/Sala.astro';
+import { SITE } from '../consts';
+import { proyectosOrdenados } from '../utils';
+const proyectos = await proyectosOrdenados();
+---
+<Base>
+  <!-- Precarga: solo la primera visita de la sesión -->
+  <div class="pre" data-preloader aria-hidden="true">
+    <div class="pre-top pad" data-pre-fade>
+      <span class="label pre-l">Portfolio</span>
+      <span class="label pre-l">{SITE.rolCorto}</span>
+    </div>
+    <div class="pre-bot pad" data-pre-fade>
+      <span class="pre-n display tnum" data-count>000</span>
+      <span class="pre-bar"><span data-bar></span></span>
+    </div>
+  </div>
+
+  <!-- Hero: titular con el vídeo dentro; al bajar, el vídeo se abre a pantalla completa -->
+  <section class="hero" data-hero data-hero-pin data-tone="light">
+    <div class="hero-txt">
+      <div class="hero-in">
+        <div class="fila" data-reveal="1">
+          <span>( Portfolio )</span>
+          <span>Data Engineer · BI Consultant</span>
+          <span class="tnum">{new Date().getFullYear()}</span>
+        </div>
+        <h1 class="hero-h serif" aria-label="My Portfolio">
+          <span class="ln"><span class="ln-i">MY <span class="pill" data-pill aria-hidden="true"></span><br class="br-m" /> PORTFOLIO<span class="punto">.</span></span></span>
+        </h1>
+        <div class="fila" data-reveal="2">
+          <span>Power BI · DAX · Microsoft Fabric · dbt · SQL</span>
+          <span class="tnum">( 03 ) Trabajos seleccionados</span>
+          <span>Desliza ↓</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-vid" data-hero-vid data-tone="dark">
+      <video autoplay muted loop playsinline preload="auto" aria-hidden="true">
+        <source src="/video/edificios.mp4" type="video/mp4" />
+      </video>
+      <div class="velo"></div>
+    </div>
+  </section>
+
+  <Sala proyectos={proyectos} />
+</Base>
+
+<style>
+  /* Precarga */
+  .pre { display: none; }
+  :global(.js-motion:not(.pre-done)) .pre { display: flex; }
+  .pre { position: fixed; inset: 0; z-index: 120; background: var(--navy); color: var(--on-dark); flex-direction: column; justify-content: space-between; padding-block: 1.6rem 2rem; }
+  .pre-top { display: flex; justify-content: space-between; }
+  .pre-l { color: var(--on-dark-muted); }
+  .pre-bot { display: flex; flex-direction: column; gap: 1.4rem; }
+  .pre-n { font-size: clamp(5rem, 18vw, 16rem); line-height: 0.8; }
+  .pre-bar { display: block; height: 1px; background: rgba(243, 240, 232, 0.16); }
+  .pre-bar span { display: block; height: 100%; background: var(--gold); transform: scaleX(0); transform-origin: left; }
+
+  /* Hero tipográfico */
+  .hero { position: relative; background: var(--paper); }
+  .hero-txt { min-height: 100svh; display: flex; align-items: center; padding: 6rem var(--pad) 3rem; }
+  .hero-in { width: 100%; }
+  .hero-h { margin: 0; text-align: center; font-weight: 400; font-size: min(12.9vw, 30svh); line-height: 0.9; letter-spacing: -0.03em; color: var(--ink); }
+  :global(.js-motion) .hero-h { visibility: hidden; }
+  .ln { display: block; overflow: hidden; padding: 0.08em 0 0.04em; }
+  .ln-i { display: inline-block; white-space: nowrap; }
+  .punto { color: var(--accent); }
+  .pill {
+    display: inline-block; width: 1.75em; height: 0.66em; vertical-align: 0.04em; margin: 0 0.02em;
+    border-radius: 999px; background: #1c1c1c;
+  }
+  .br-m { display: none; }
+  .fila { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding-block: 1rem; border-top: 1px solid var(--line); }
+  .fila:last-child { border-top: 0; border-bottom: 1px solid var(--line); }
+  @media (max-width: 760px) {
+    .hero-h { font-size: 21.5vw; text-align: left; }
+    .ln-i { white-space: normal; }
+    .br-m { display: inline; }
+    .pill { width: 1.5em; }
+    .fila { flex-direction: column; gap: 0.3rem; }
+  }
+
+  /* Vídeo: sin animación va debajo, a pantalla completa */
+  .hero-vid { position: relative; height: 100svh; overflow: hidden; background: var(--navy); color: var(--on-dark); }
+  .hero-vid video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(0.6) contrast(1.05); }
+  .hero-vid video { filter: grayscale(1) contrast(1.1) brightness(0.85); }
+  .velo { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10, 10, 10, 0.15), rgba(10, 10, 10, 0.2) 60%, rgba(10, 10, 10, 0.75)); }
+
+  /* Con animación: el vídeo vive encima del titular, recortado a la píldora */
+  :global(.js-motion) .hero { height: 100svh; overflow: hidden; }
+  :global(.js-motion) .hero-txt { height: 100svh; }
+  :global(.js-motion) .hero-vid { position: absolute; inset: 0; height: auto; z-index: 2; opacity: 0; will-change: clip-path; }
+
+
+</style>

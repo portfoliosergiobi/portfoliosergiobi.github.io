@@ -1,0 +1,101 @@
+/* ==========================================================================
+   Sistema de diseño — "Negro total"
+   Fondo casi negro, texto blanco cálido, un único acento mínimo.
+   (Los nombres de las variables se conservan para no tocar cada componente.)
+   ========================================================================== */
+:root {
+  --paper: #0a0a0a;         /* fondo */
+  --paper-2: #141414;       /* fondo elevado */
+  --ink: #f2efe9;           /* texto */
+  --ink-2: rgba(242, 239, 233, 0.74);
+  --muted: rgba(242, 239, 233, 0.46);
+  --line: rgba(242, 239, 233, 0.12);
+  --line-strong: rgba(242, 239, 233, 0.32);
+  --navy: #050505;          /* bandas más profundas */
+  --navy-2: #161616;
+  --gold: #d8d2c4;          /* realce discreto */
+  --accent: #ff5b2e;        /* acento: solo en detalles mínimos */
+  --on-dark: #f2efe9;
+  --on-dark-muted: rgba(242, 239, 233, 0.56);
+
+  --serif: 'Instrument Serif', 'Times New Roman', serif;
+  --sans: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --pad: clamp(1.25rem, 4vw, 4rem);
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 16px/1.6 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: var(--ink); color: var(--paper); }
+a { color: inherit; }
+img, video { max-width: 100%; display: block; }
+
+/* Grano de papel muy sutil sobre toda la web */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: 0.07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- Tipografía base ---------- */
+.serif { font-family: var(--serif); font-weight: 400; }
+.display {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 0.92;
+}
+.display em, .serif em { font-style: italic; }
+.label {
+  font: 400 0.74rem/1.3 var(--sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.num { font-family: var(--serif); font-style: italic; font-weight: 400; font-feature-settings: 'tnum', 'lnum'; }
+.acento { color: var(--accent); }
+.tnum { font-feature-settings: 'tnum', 'lnum'; }
+
+/* ---------- Estructura ---------- */
+.pad { padding-inline: var(--pad); }
+.rule { border: 0; border-top: 1px solid var(--line); margin: 0; }
+.rule-strong { border: 0; border-top: 1px solid var(--line-strong); margin: 0; }
+
+/* Enlace subrayado animado */
+.link {
+  text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat;
+  transition: background-size 0.6s var(--ease);
+  padding-bottom: 2px;
+}
+.link:hover { background-size: 0% 1px; background-position: 100% 100%; }
+
+/* Flecha que se desplaza */
+.arrow { display: inline-block; transition: transform 0.5s var(--ease); }
+a:hover .arrow { transform: translateX(0.35em); }
+
+/* ---------- Animación: estados iniciales (solo con JS y sin reducir movimiento) ---------- */
+.js-motion [data-reveal] { opacity: 0; transform: translateY(24px); }
+.js-motion [data-split] { visibility: hidden; }
+
+/* ---------- Cortina de transición entre páginas ---------- */
+.curtain {
+  position: fixed; inset: 0; z-index: 100; background: #161616;
+  transform: scaleY(0); transform-origin: bottom; pointer-events: none;
+}
+.is-arriving .curtain { transform: scaleY(1); transform-origin: top; }
+
+/* Lenis */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
