@@ -1,16 +1,17 @@
 ---
-interface Props { url?: string; titulo: string }
-const { url, titulo } = Astro.props;
+interface Props { url?: string; titulo: string; recorte?: number }
+// recorte: px que se esconden arriba (franja blanca de Power BI). La hora barata la trae (10); Nolva no (0).
+const { url, titulo, recorte = 10 } = Astro.props;
 ---
 <figure class="pbi">
-  <div class="marco">
+  <div class="marco" style={`--recorte: ${recorte}px`}>
     {url && <iframe src={url} title={titulo} allowfullscreen referrerpolicy="no-referrer"></iframe>}
   </div>
 </figure>
 
 <style>
   .pbi { margin: 0; container-type: inline-size; }
-  /* Página 16:9 más las barras de Power BI (60 px) y sus 10 px en blanco; la franja superior se recorta */
+  /* Página 16:9 más las barras de Power BI (60 px) y sus 10 px en blanco; la franja superior se recorta (--recorte, por proyecto) */
   .marco { position: relative; height: calc(100cqw * 9 / 16 + 70px); background: var(--navy); overflow: hidden; }
-  .marco :global(iframe) { position: absolute; top: -10px; left: 0; width: 100%; height: calc(100% + 10px); border: 0; background: var(--navy); }
+  .marco :global(iframe) { position: absolute; top: calc(-1 * var(--recorte, 10px)); left: 0; width: 100%; height: calc(100% + var(--recorte, 10px)); border: 0; background: var(--navy); }
 </style>

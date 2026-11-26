@@ -11,7 +11,7 @@ const proyectos = defineCollection({
     anio: z.number(),
     orden: z.number(),
     captura: z.string(),
-    informe: z.object({ url: z.string().url(), titulo: z.string() }).optional(),
+    informe: z.object({ url: z.string().url(), titulo: z.string(), recorte: z.number().optional() }).optional(),
     frase: z.string().optional(),
     cadena: z.array(z.string()).default([]),
     credito: z.string().optional(),

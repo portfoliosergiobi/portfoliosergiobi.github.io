@@ -28,7 +28,7 @@ const siguienteEsHueco = i + 1 >= total && i + 1 < TOTAL_PROYECTOS;
         <p class="label" data-reveal="0">{d.area}</p>
       </div>
       <div class="informe-top" id="informe">
-        <PowerBI url={d.informe?.url} titulo={d.informe?.titulo ?? d.titulo} />
+        <PowerBI url={d.informe?.url} titulo={d.informe?.titulo ?? d.titulo} recorte={d.informe?.recorte} />
       </div>
       <div class="nota">
         <p class="frase serif">{d.frase ?? d.resumen}</p>
