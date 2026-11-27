@@ -208,6 +208,19 @@ function sala() {
   const nEl = sec.querySelector<HTMLElement>('[data-sala-n]');
   const mm = gsap.matchMedia();
 
+  // Vídeo de tarjeta: se reproduce UNA vez cuando la tarjeta llega al centro; al salir se queda en el último
+  // fotograma (igual que el póster). Sin bucle: el salto del final al principio se notaría.
+  const vids = cartas.map((c) => c.querySelector<HTMLVideoElement>('[data-carta-video]'));
+  let enJuego = -1;
+  const enfocar = (k: number) => {
+    if (k === enJuego) return;
+    const prev = enJuego >= 0 ? vids[enJuego] : null;
+    if (prev) { prev.pause(); if (prev.duration) prev.currentTime = prev.duration; }
+    enJuego = k;
+    const v = k >= 0 ? vids[k] : null;
+    if (v) { v.currentTime = 0; v.play().catch(() => {}); }
+  };
+
   mm.add('(min-width: 1000px)', () => {
     sec.classList.add('live');
     // Distancia entre la primera y la última tarjeta: así la última acaba centrada
@@ -236,6 +249,7 @@ function sala() {
       });
       if (suelo) suelo.style.backgroundPosition = `${x * 0.6}px 0`;
       if (nEl && cerca !== actual) { actual = cerca; nEl.textContent = String(cerca + 1).padStart(2, '0'); }
+      enfocar(min < 0.12 ? cerca : -1);
     };
     gsap.ticker.add(pintar);
 
@@ -283,6 +297,7 @@ function sala() {
         if (d < min) { min = d; cerca = k; }
       });
       if (nEl) nEl.textContent = String(cerca + 1).padStart(2, '0');
+      enfocar(min < cartas[cerca].offsetWidth * 0.25 ? cerca : -1);
     };
     pista.addEventListener('scroll', contar, { passive: true });
     contar();
